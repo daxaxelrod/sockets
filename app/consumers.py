@@ -74,3 +74,11 @@ def ws_message(message):
 @channel_session_user
 def ws_disconnect(message):
 	Group("chat-%s" % message.user.username[0]).discard(message.reply_channel)
+
+@channel_session_user_from_http
+def ws_add(message, room):
+	Group("chat-%s" % room).add(message.reply_channel)
+
+###########
+##Models###
+###########
