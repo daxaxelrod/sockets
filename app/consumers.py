@@ -1,6 +1,8 @@
 from django.http import HttpResponse
 from channels.handler import AsgiHandler
 from channels import Group
+from channels.sessions import channel_session
+
 
 #handles http
 def http_consumer(message):
@@ -9,7 +11,7 @@ def http_consumer(message):
 		message.reply_channel.send(chunk)
 
 
-# used for js console
+# used for js console # If you want this back, make sure to change routing.py
 # def ws_message(message):
 # 	#message packet have a text key for their textual data
 # 	# message.reply_channel.send({
@@ -38,6 +40,7 @@ def ws_connect(message):
 	# get room name
 	room = message.content["path"].strip("/")
 	message.channel_session["room"] = room
+	print("chatter in %s" % room)
 	Group("chat-%s" % room).add(message.reply_channel)
 
 @channel_session
@@ -49,4 +52,3 @@ def ws_message(message):
 @channel_session
 def ws_disconnect(message):
 	Group("chat-%s" % message.channel_session["room"]),discard(message.reply_channel)
-	
