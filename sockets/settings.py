@@ -122,11 +122,12 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 #sockets is the name of the app and channel routing is the array with the routes
+# In settings.py
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "asgi_redis.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("localhost", 8000)],
+            "hosts": [("localhost", 6379)],
         },
         "ROUTING": "sockets.routing.channel_routing",
     },

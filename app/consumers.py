@@ -35,20 +35,20 @@ def http_consumer(message):
 #used for chat room
 @channel_session
 def ws_connect(message):
-	#accept connection
-	message.reply_channel.send({"accept": True})
-	# get room name
-	room = message.content["path"].strip("/")
-	message.channel_session["room"] = room
-	print("chatter in %s" % room)
-	Group("chat-%s" % room).add(message.reply_channel)
+    # Accept connection
+    message.reply_channel.send({"accept": True})
+    # get room name
+    room = message.content['path'].strip("/")
+    # Save room in session and add us to the group
+    message.channel_session['room'] = room
+    Group("chat-%s" % room).add(message.reply_channel)
 
 @channel_session
 def ws_message(message):
-	Group("chat-%s" % message.channel_session["room"]).send({
-		"text": message["text"],
-	})
+    Group("chat-%s" % message.channel_session['room']).send({
+        "text": message['text'],
+    })
 
 @channel_session
 def ws_disconnect(message):
-	Group("chat-%s" % message.channel_session["room"]),discard(message.reply_channel)
+    Group("chat-%s" % message.channel_session['room']).discard(message.reply_channel)
