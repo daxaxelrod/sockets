@@ -4,7 +4,7 @@ from channels import Group
 from channels.sessions import channel_session
 from channels.auth import http_session_user, channel_session_user, channel_session_user_from_http
 
-
+from .models import ChatMessage
 
 #handles http
 def http_consumer(message):
@@ -82,3 +82,33 @@ def ws_add(message, room):
 ###########
 ##Models###
 ###########
+
+def msg_consumer_with_models(message):
+	room = message.content["room"]
+	ChatMessage.objects.create(room=room,
+							   message=message.content["message"])
+	Group("chat-%s" % room).send({
+		"text": message.content["message"]
+	})
+
+@channel_session
+def ws_connect_with_models(message):
+	room = message.content["path"].strip("/")
+	message.channel_session["room"] = room
+	Group("chat-%s" % room).add(message.reply_channel)
+
+@channel_session
+def ws_message_with_models(message):
+	Channel("chat-messages").send({
+		"room": message.channel_session['room'],
+        "message": message['text'],
+	})
+
+@channel_session
+def ws_disconnect(message):
+	Group("chat-%s" % message.channel_session["room"]).discard(message.reply_channel)
+
+#### ordering
+## keeps messages from going from recieve to connect rather than the other way around
+# enforce_ordering(slight=True)
+# imported from channel.sessions
